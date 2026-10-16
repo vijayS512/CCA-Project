@@ -1,0 +1,128 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-200">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900">Campus Venues & Rooms</h1>
+      <p class="text-sm text-slate-500 mt-1">Book lecture halls, computer labs, seminar rooms, and auditoriums with live conflict detection</p>
+    </div>
+
+    <% if (currentUser && currentUser.role === 'admin') { %>
+      <div class="mt-4 md:mt-0">
+        <a href="/rooms/new" class="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/25 transition-all">
+          <i class="fas fa-plus mr-2"></i>Add New Room
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Filters & Search Bar -->
+  <form action="/rooms" method="GET" class="my-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+    <!-- Search -->
+    <div class="lg:col-span-2">
+      <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Search Venues</label>
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+          <i class="fas fa-search text-xs"></i>
+        </span>
+        <input type="text" name="search" value="<%= filters.search || '' %>" placeholder="Room name, building, equipment..." class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+      </div>
+    </div>
+
+    <!-- Building Filter -->
+    <div>
+      <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Building</label>
+      <select name="building" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+        <option value="all">All Buildings</option>
+        <% buildings.forEach(b => { %>
+          <option value="<%= b %>" <%= filters.building === b ? 'selected' : '' %>><%= b %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Room Type Filter -->
+    <div>
+      <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Venue Type</label>
+      <select name="roomType" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+        <option value="all">All Types</option>
+        <% roomTypes.forEach(t => { %>
+          <option value="<%= t %>" <%= filters.roomType === t ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Submit Filter Button -->
+    <div class="flex space-x-2">
+      <button type="submit" class="flex-1 py-2 px-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all text-center">
+        Apply Filters
+      </button>
+      <a href="/rooms" class="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center">
+        Reset
+      </a>
+    </div>
+  </form>
+
+  <!-- Rooms Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% if (rooms && rooms.length > 0) { %>
+      <% rooms.forEach(room => { %>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+          <div>
+            <div class="relative h-44 w-full bg-slate-100 overflow-hidden">
+              <img src="<%= room.image %>" alt="<%= room.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <span class="absolute top-3 right-3 px-2.5 py-1 rounded-md text-xs font-bold <%= room.isAvailable ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' %>">
+                <%= room.isAvailable ? 'Available' : 'Maintenance' %>
+              </span>
+              <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur text-white px-2 py-0.5 rounded text-xs font-medium">
+                <i class="fas fa-users mr-1"></i>Seats: <%= room.capacity %>
+              </span>
+            </div>
+
+            <div class="p-5">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-brand-600"><%= room.roomType %></span>
+              <h3 class="text-lg font-bold text-slate-900 mt-0.5"><%= room.name %></h3>
+              <p class="text-xs text-slate-500 mt-1">
+                <i class="far fa-building mr-1"></i><%= room.building %> &bull; <%= room.floor %>
+              </p>
+
+              <!-- Amenities list -->
+              <div class="flex flex-wrap gap-1 mt-3">
+                <% room.amenities.forEach(amenity => { %>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">
+                    <%= amenity %>
+                  </span>
+                <% }) %>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-5 pt-0 border-t border-slate-100 mt-4 flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-400">Instant Schedule</span>
+            <div class="flex items-center space-x-2">
+              <% if (currentUser && currentUser.role === 'admin') { %>
+                <a href="/rooms/<%= room._id %>/edit" class="p-2 text-slate-400 hover:text-brand-600 text-xs">
+                  <i class="far fa-edit"></i>
+                </a>
+              <% } %>
+              <a href="/rooms/<%= room._id %>" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-all shadow-sm">
+                Check Slots & Book
+              </a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-slate-300">
+        <i class="far fa-building text-4xl text-slate-300 mb-3"></i>
+        <p class="text-slate-600 font-bold">No campus venues matched your filters.</p>
+        <p class="text-xs text-slate-400 mt-1">Try clearing your search query or building selection.</p>
+        <a href="/rooms" class="mt-4 inline-block px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl">Clear Filters</a>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

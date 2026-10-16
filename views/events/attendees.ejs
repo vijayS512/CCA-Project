@@ -1,0 +1,106 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <div class="mb-4 flex items-center space-x-2 text-xs text-slate-500">
+    <a href="/events" class="hover:text-brand-600">Events</a>
+    <span>/</span>
+    <a href="/events/<%= event._id %>" class="hover:text-brand-600"><%= event.title %></a>
+    <span>/</span>
+    <span class="text-slate-800 font-bold">Attendee Roster</span>
+  </div>
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-200">
+    <div>
+      <h1 class="text-2xl font-black text-slate-900"><%= event.title %> &mdash; Attendee List</h1>
+      <p class="text-xs text-slate-500 mt-1">Manage RSVP confirmations and check in attendees at the door</p>
+    </div>
+    <div class="mt-4 md:mt-0 flex items-center space-x-3">
+      <span class="px-3 py-1.5 bg-brand-50 border border-brand-100 rounded-xl text-xs font-bold text-brand-700">
+        Total RSVP: <%= attendees.length %> / <%= event.capacity %>
+      </span>
+      <button onclick="window.print()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors">
+        <i class="fas fa-print mr-1"></i>Print Roster
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <% if (attendees && attendees.length > 0) { %>
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4 sm:px-6">Attendee Name</th>
+                <th class="py-3.5 px-4">Student/Employee ID</th>
+                <th class="py-3.5 px-4">Department</th>
+                <th class="py-3.5 px-4">Ticket Code</th>
+                <th class="py-3.5 px-4 text-right">Check-In Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+              <% attendees.forEach((att, idx) => { %>
+                <tr class="hover:bg-slate-50/60 transition-colors">
+                  <td class="py-4 px-4 sm:px-6">
+                    <div class="font-bold text-slate-900"><%= att.user ? att.user.name : 'Unknown User' %></div>
+                    <div class="text-[11px] text-slate-400"><%= att.user ? att.user.email : '' %></div>
+                  </td>
+                  <td class="py-4 px-4 font-mono font-semibold text-slate-600">
+                    <%= att.user && att.user.studentOrEmployeeId ? att.user.studentOrEmployeeId : '—' %>
+                  </td>
+                  <td class="py-4 px-4">
+                    <%= att.user ? att.user.department : 'General' %>
+                  </td>
+                  <td class="py-4 px-4 font-mono font-bold text-brand-600">
+                    <%= att.ticketCode %>
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <button id="btn-<%= att._id %>" onclick="toggleCheckIn('<%= att._id %>')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm <%= att.checkedIn ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' %>">
+                      <i class="fas fa-check mr-1.5"></i>
+                      <span id="label-<%= att._id %>"><%= att.checkedIn ? 'Checked In' : 'Mark Present' %></span>
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="py-16 text-center bg-white rounded-2xl border border-dashed border-slate-300">
+        <i class="fas fa-users text-4xl text-slate-300 mb-3"></i>
+        <h3 class="text-base font-bold text-slate-800">No Attendees Registered Yet</h3>
+        <p class="text-xs text-slate-500 mt-1">Registrations will appear here in real-time as students claim passes.</p>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<script>
+  async function toggleCheckIn(registrationId) {
+    try {
+      const res = await fetch(`/events/attendees/${registrationId}/checkin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success) {
+        const btn = document.getElementById(`btn-${registrationId}`);
+        const label = document.getElementById(`label-${registrationId}`);
+        if (data.checkedIn) {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm bg-emerald-600 text-white';
+          label.textContent = 'Checked In';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700';
+          label.textContent = 'Mark Present';
+        }
+      }
+    } catch (err) {
+      console.error('Check-in error:', err);
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

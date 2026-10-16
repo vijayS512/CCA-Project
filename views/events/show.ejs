@@ -1,0 +1,188 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <!-- Breadcrumbs -->
+  <div class="mb-4 flex items-center space-x-2 text-xs text-slate-500">
+    <a href="/events" class="hover:text-brand-600">Events</a>
+    <span>/</span>
+    <span class="text-slate-800 font-bold"><%= event.title %></span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Main Event Details (2 Cols) -->
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="relative h-72 sm:h-96 w-full bg-slate-100 overflow-hidden">
+          <img src="<%= event.bannerImage %>" alt="<%= event.title %>" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent flex items-end p-6 sm:p-8">
+            <div>
+              <span class="px-3 py-1 rounded-lg bg-brand-600 text-white text-xs font-bold uppercase tracking-wider shadow-sm">
+                <%= event.category %>
+              </span>
+              <h1 class="text-2xl sm:text-4xl font-extrabold text-white mt-2 leading-tight">
+                <%= event.title %>
+              </h1>
+              <div class="text-xs text-slate-300 mt-1">
+                Organized by <span class="font-bold text-white"><%= event.organizingClub %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 sm:p-8">
+          <h2 class="text-base font-bold text-slate-900 uppercase tracking-wider mb-3">About This Event</h2>
+          <div class="text-sm text-slate-600 leading-relaxed space-y-4 whitespace-pre-line">
+            <%= event.description %>
+          </div>
+
+          <!-- Organizer Info Box -->
+          <div class="mt-8 pt-6 border-t border-slate-100 flex items-center space-x-4">
+            <img src="<%= event.organizer ? event.organizer.avatar : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' %>" alt="Organizer" class="w-12 h-12 rounded-full border border-slate-200 object-cover">
+            <div>
+              <div class="text-xs text-slate-400 font-semibold uppercase">Event Host</div>
+              <div class="text-sm font-bold text-slate-800"><%= event.organizer ? event.organizer.name : 'College Organizer' %></div>
+              <div class="text-xs text-slate-500"><%= event.organizer ? event.organizer.department : 'Campus Affairs' %></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Registration Card & Logistics -->
+    <div class="lg:col-span-1 space-y-6">
+      
+      <!-- Event Ticket / RSVP Card -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sticky top-24">
+        <h3 class="text-base font-bold text-slate-900 mb-4">Registration & Ticket Pass</h3>
+
+        <!-- Real-Time Capacity Tracker -->
+        <div class="p-4 bg-slate-50 rounded-xl mb-6">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
+            <span>Live Attendees RSVP</span>
+            <span id="registeredCountDisplay" class="text-brand-600 font-black text-sm">
+              <%= event.registeredCount %> / <%= event.capacity %>
+            </span>
+          </div>
+          <% const pct = Math.min(100, Math.round((event.registeredCount / event.capacity) * 100)); %>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div id="capacityProgressBar" class="bg-brand-600 h-full rounded-full transition-all duration-500" style="width: <%= pct %>%;"></div>
+          </div>
+          <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 font-medium">
+            <span class="flex items-center text-emerald-600 font-bold">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping mr-1"></span> Live Socket Sync
+            </span>
+            <span><%= Math.max(0, event.capacity - event.registeredCount) %> seats left</span>
+          </div>
+        </div>
+
+        <!-- Event Logistics Details -->
+        <div class="space-y-4 mb-6 text-xs text-slate-600">
+          <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center text-sm shrink-0">
+              <i class="far fa-calendar-alt"></i>
+            </div>
+            <div>
+              <div class="font-bold text-slate-800">Date & Schedule</div>
+              <div><%= new Date(event.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+              <div class="text-slate-400"><%= event.startTime %> to <%= event.endTime %></div>
+            </div>
+          </div>
+
+          <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm shrink-0">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div>
+              <div class="font-bold text-slate-800">Campus Venue</div>
+              <% if (event.room) { %>
+                <a href="/rooms/<%= event.room._id %>" class="text-brand-600 font-semibold hover:underline">
+                  <%= event.room.name %> (<%= event.room.building %>)
+                </a>
+              <% } else { %>
+                <div><%= event.customVenue || 'Campus Grounds' %></div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registration Action Form -->
+        <% if (isRegistered) { %>
+          <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+            <i class="fas fa-check-circle text-emerald-600 text-2xl mb-1"></i>
+            <div class="text-xs font-bold text-emerald-800">You Are Registered!</div>
+            <div class="text-[11px] text-emerald-600 mt-1">Ticket Code: <span class="font-mono font-bold"><%= userRegistration.ticketCode %></span></div>
+            <a href="/events/my-tickets" class="mt-3 block w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm">
+              View Your Ticket & QR Code
+            </a>
+          </div>
+        <% } else if (event.registeredCount >= event.capacity) { %>
+          <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-center text-rose-800 text-xs font-bold">
+            <i class="fas fa-ban text-lg mb-1 block"></i>
+            Registration Full (Sold Out)
+          </div>
+        <% } else if (currentUser) { %>
+          <form action="/events/<%= event._id %>/register" method="POST">
+            <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-brand-500/25 transition-all hover:scale-[1.01] flex items-center justify-center space-x-2">
+              <i class="fas fa-ticket-alt"></i>
+              <span>Claim Your Free Event Pass</span>
+            </button>
+            <p class="text-[10px] text-slate-400 text-center mt-2">Instant QR ticket delivered to your college email.</p>
+          </form>
+        <% } else { %>
+          <a href="/auth/login" class="block w-full py-3.5 text-center bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl shadow-md transition-all">
+            Log In to Register
+          </a>
+        <% } %>
+
+        <!-- Organizer Management Toolbar -->
+        <% if (currentUser && (currentUser.role === 'admin' || (event.organizer && event.organizer._id.toString() === currentUser._id.toString()))) { %>
+          <div class="mt-6 pt-6 border-t border-slate-100">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Organizer Controls</h4>
+            <a href="/events/<%= event._id %>/attendees" class="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center justify-center space-x-2 transition-colors">
+              <i class="fas fa-users-cog"></i>
+              <span>View Attendee List & QR Check-In</span>
+            </a>
+          </div>
+        <% } %>
+
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const eventId = "<%= event._id %>";
+  const totalCapacity = <%= event.capacity %>;
+
+  // Real-time live attendee RSVP counter via Socket.IO
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof io !== 'undefined') {
+      const socket = io();
+      socket.emit('join_event_view', eventId);
+
+      socket.on('event:rsvp_updated', (data) => {
+        if (data.eventId === eventId) {
+          const display = document.getElementById('registeredCountDisplay');
+          const bar = document.getElementById('capacityProgressBar');
+          if (display) {
+            display.textContent = `${data.registeredCount} / ${data.capacity}`;
+          }
+          if (bar) {
+            const pct = Math.min(100, Math.round((data.registeredCount / data.capacity) * 100));
+            bar.style.width = `${pct}%`;
+          }
+          if (window.showToast) {
+            window.showToast('Live Update', 'Another student just registered for this event!', 'info');
+          }
+        }
+      });
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

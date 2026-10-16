@@ -1,0 +1,152 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200">
+    <div>
+      <div class="flex items-center space-x-2">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-100 text-brand-800 uppercase tracking-wider">Student Dashboard</span>
+        <span class="text-xs text-slate-400">&bull;</span>
+        <span class="text-xs text-slate-500"><%= currentUser.department %></span>
+      </div>
+      <h1 class="text-3xl font-black text-slate-900 mt-1">Hello, <%= currentUser.name %>!</h1>
+    </div>
+
+    <div class="mt-4 sm:mt-0 flex items-center space-x-3">
+      <a href="/events" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/25 transition-all">
+        <i class="far fa-calendar-alt mr-1.5"></i>Discover Events
+      </a>
+      <a href="/rooms" class="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all">
+        <i class="far fa-building mr-1.5 text-brand-600"></i>Reserve Study Room
+      </a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+    
+    <!-- Left 2 Cols: My Passes & My Bookings -->
+    <div class="lg:col-span-2 space-y-8">
+      
+      <!-- My Passes / Tickets -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">My Registered Event Passes</h2>
+            <p class="text-xs text-slate-500">Your upcoming tickets and door passes</p>
+          </div>
+          <a href="/events/my-tickets" class="text-xs font-bold text-brand-600 hover:text-brand-800">View All Passes</a>
+        </div>
+
+        <div class="mt-4">
+          <% if (myTickets && myTickets.length > 0) { %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <% myTickets.forEach(reg => { %>
+                <% const evt = reg.event; %>
+                <% if (evt) { %>
+                  <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+                    <div>
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-700 uppercase"><%= evt.category %></span>
+                      <h3 class="text-sm font-bold text-slate-900 mt-1 line-clamp-1"><%= evt.title %></h3>
+                      <div class="text-xs text-slate-500 mt-1">
+                        <i class="far fa-calendar mr-1"></i><%= new Date(evt.date).toDateString() %> at <%= evt.startTime %>
+                      </div>
+                      <div class="text-xs text-slate-500">
+                        <i class="fas fa-map-marker-alt mr-1"></i><%= evt.room ? evt.room.name : evt.customVenue || 'Campus' %>
+                      </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200/70 flex items-center justify-between">
+                      <span class="font-mono text-xs font-bold text-brand-700"><%= reg.ticketCode %></span>
+                      <a href="/events/my-tickets" class="text-xs font-bold text-brand-600 hover:underline">Show QR</a>
+                    </div>
+                  </div>
+                <% } %>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="text-center py-8 text-slate-400 text-xs">
+              <i class="fas fa-ticket-alt text-2xl text-slate-300 mb-2 block"></i>
+              You haven't claimed any event passes yet.
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- My Room Bookings -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">My Room Reservation Requests</h2>
+            <p class="text-xs text-slate-500">Study spaces and project lab reservations</p>
+          </div>
+          <a href="/bookings/my-bookings" class="text-xs font-bold text-brand-600 hover:text-brand-800">View All</a>
+        </div>
+
+        <div class="mt-4 space-y-3">
+          <% if (myBookings && myBookings.length > 0) { %>
+            <% myBookings.forEach(b => { %>
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-bold text-slate-900"><%= b.room ? b.room.name : 'Unknown Room' %></div>
+                  <div class="text-[11px] text-slate-500"><%= b.date %> &bull; <%= b.startTime %> - <%= b.endTime %></div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase <%= b.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : (b.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600') %>">
+                  <%= b.status %>
+                </span>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="text-center py-6 text-slate-400 text-xs">
+              No recent room bookings. Need a study room? <a href="/rooms" class="text-brand-600 font-bold hover:underline">Browse venues</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right 1 Col: Recommended Events & Notifications -->
+    <div class="lg:col-span-1 space-y-8">
+      
+      <!-- Recommended Events -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h2 class="text-base font-bold text-slate-900 mb-4">Recommended Events</h2>
+        <div class="space-y-4">
+          <% recommendedEvents.forEach(evt => { %>
+            <div class="group border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-brand-600"><%= evt.category %></span>
+              <a href="/events/<%= evt._id %>" class="block text-xs font-bold text-slate-800 group-hover:text-brand-600 transition-colors mt-0.5">
+                <%= evt.title %>
+              </a>
+              <div class="text-[11px] text-slate-400 mt-0.5">
+                <%= new Date(evt.date).toDateString() %> &bull; <%= evt.capacity - evt.registeredCount %> seats left
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- In-App Notification Center -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h2 class="text-base font-bold text-slate-900 mb-4">Recent Alerts</h2>
+        <div class="space-y-3">
+          <% if (notifications && notifications.length > 0) { %>
+            <% notifications.slice(0, 5).forEach(n => { %>
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                <div class="font-bold text-slate-800"><%= n.title %></div>
+                <p class="text-slate-500 text-[11px] mt-0.5"><%= n.message %></p>
+                <div class="text-[10px] text-slate-400 mt-1"><%= new Date(n.createdAt).toLocaleDateString() %></div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="text-center py-6 text-slate-400 text-xs">No notifications yet.</div>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

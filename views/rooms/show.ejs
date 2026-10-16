@@ -1,0 +1,252 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <!-- Breadcrumb & Back -->
+  <div class="mb-4 flex items-center space-x-2 text-xs text-slate-500">
+    <a href="/rooms" class="hover:text-brand-600">Venues & Rooms</a>
+    <span>/</span>
+    <span class="text-slate-800 font-bold"><%= room.name %></span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left Column: Room Details & Amenities -->
+    <div class="lg:col-span-1 space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="h-56 w-full bg-slate-100 overflow-hidden relative">
+          <img src="<%= room.image %>" alt="<%= room.name %>" class="w-full h-full object-cover">
+          <span class="absolute top-3 right-3 px-2.5 py-1 rounded-md text-xs font-bold <%= room.isAvailable ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' %>">
+            <%= room.isAvailable ? 'Available' : 'Maintenance' %>
+          </span>
+        </div>
+
+        <div class="p-6">
+          <span class="text-xs font-bold uppercase tracking-wider text-brand-600"><%= room.roomType %></span>
+          <h1 class="text-2xl font-black text-slate-900 mt-0.5"><%= room.name %></h1>
+          <p class="text-xs text-slate-500 mt-1">
+            <i class="far fa-building mr-1"></i><%= room.building %> &bull; <%= room.floor %>
+          </p>
+
+          <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
+            <div class="p-3 bg-slate-50 rounded-xl">
+              <div class="text-[11px] font-bold text-slate-500 uppercase">Seating Capacity</div>
+              <div class="text-lg font-black text-slate-800 mt-0.5"><%= room.capacity %> People</div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl">
+              <div class="text-[11px] font-bold text-slate-500 uppercase">Approval Rule</div>
+              <div class="text-xs font-bold text-brand-600 mt-1.5">
+                <%= room.requiresApproval ? 'Admin / Faculty' : 'Instant' %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <% if (room.description) { %>
+            <div class="mt-4">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Description</h4>
+              <p class="text-xs text-slate-600 mt-1 leading-relaxed"><%= room.description %></p>
+            </div>
+          <% } %>
+
+          <!-- Amenities -->
+          <div class="mt-4 pt-4 border-t border-slate-100">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Available Equipment</h4>
+            <div class="flex flex-wrap gap-1.5">
+              <% room.amenities.forEach(amenity => { %>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-100">
+                  <i class="fas fa-check text-[10px] mr-1 text-brand-500"></i><%= amenity %>
+                </span>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Schedule & Booking Form -->
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        
+        <!-- Header with Date Selector -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Room Availability & Schedule</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Real-time status updates powered by Socket.IO</p>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <label for="scheduleDate" class="text-xs font-bold text-slate-600">Date:</label>
+            <input type="date" id="scheduleDate" value="<%= selectedDate %>" onchange="changeDate(this.value)" class="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+          </div>
+        </div>
+
+        <!-- Schedule Slots Grid -->
+        <div class="mt-6">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Time Slot Matrix (<%= selectedDate %>)</h3>
+            <div class="flex items-center space-x-3 text-xs">
+              <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-1.5"></span>Available</span>
+              <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-rose-500 mr-1.5"></span>Booked</span>
+            </div>
+          </div>
+
+          <div id="slotsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div class="col-span-full text-center py-6 text-slate-400 text-xs">
+              <i class="fas fa-spinner fa-spin mr-2"></i>Loading live slot availability...
+            </div>
+          </div>
+        </div>
+
+        <!-- Reservation Booking Form Card -->
+        <div class="mt-8 pt-6 border-t border-slate-200">
+          <h3 class="text-base font-bold text-slate-900 mb-4">
+            <i class="far fa-calendar-plus text-brand-600 mr-2"></i>Request Room Reservation
+          </h3>
+
+          <% if (currentUser) { %>
+            <form action="/bookings/book" method="POST" class="space-y-4">
+              <input type="hidden" name="roomId" value="<%= room._id %>">
+              <input type="hidden" id="formDate" name="date" value="<%= selectedDate %>">
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Start Time</label>
+                  <input type="time" id="startTimeInput" name="startTime" required value="09:00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">End Time</label>
+                  <input type="time" id="endTimeInput" name="endTime" required value="10:00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Expected Attendees</label>
+                  <input type="number" name="expectedAttendees" min="1" max="<%= room.capacity %>" value="10" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Target Date</label>
+                  <input type="text" id="displayDate" disabled value="<%= selectedDate %>" class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-xl text-xs font-bold text-slate-600">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Purpose / Activity Details</label>
+                <textarea name="purpose" rows="2" required placeholder="e.g. AI Club Coding Workshop, Project Defense, Faculty Meeting..." class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+              </div>
+
+              <div class="pt-2 flex items-center justify-between">
+                <span class="text-[11px] text-slate-400">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  <%= currentUser.role === 'student' ? 'Students require faculty/admin approval' : 'Faculty and Admin requests are auto-approved' %>
+                </span>
+                <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/25 transition-all">
+                  Confirm Booking Request
+                </button>
+              </div>
+            </form>
+          <% } else { %>
+            <div class="p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-center">
+              <p class="text-xs text-slate-600 font-medium">Please sign in to reserve this venue.</p>
+              <a href="/auth/login" class="mt-3 inline-block px-5 py-2 bg-brand-600 text-white font-bold text-xs rounded-xl shadow-sm">
+                Log In to Reserve
+              </a>
+            </div>
+          <% } %>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const roomId = "<%= room._id %>";
+  let currentDate = "<%= selectedDate %>";
+
+  // Change date handler
+  function changeDate(newDate) {
+    currentDate = newDate;
+    document.getElementById('formDate').value = newDate;
+    document.getElementById('displayDate').value = newDate;
+    loadSlots(newDate);
+  }
+
+  // Fetch slot availability from API
+  async function loadSlots(date) {
+    const container = document.getElementById('slotsContainer');
+    try {
+      const res = await fetch(`/api/rooms/${roomId}/availability?date=${date}`);
+      const data = await res.json();
+
+      if (data.success) {
+        container.innerHTML = data.standardSlots.map(slot => {
+          if (slot.isBooked) {
+            return `
+              <div class="p-3 rounded-xl border border-rose-200 bg-rose-50/70 text-rose-800 flex flex-col justify-between opacity-80 cursor-not-allowed">
+                <div class="flex items-center justify-between text-xs font-bold">
+                  <span>${slot.label}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] bg-rose-200 text-rose-900 font-bold uppercase">Booked</span>
+                </div>
+                <div class="text-[10px] text-rose-600 truncate mt-1">${slot.purpose || 'Reserved'}</div>
+              </div>
+            `;
+          } else {
+            return `
+              <button type="button" onclick="selectSlot('${slot.start}', '${slot.end}')" class="p-3 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 text-emerald-800 text-left transition-all hover:scale-[1.02] flex flex-col justify-between">
+                <div class="flex items-center justify-between text-xs font-bold">
+                  <span>${slot.label}</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-200 text-emerald-900 font-bold uppercase">Free</span>
+                </div>
+                <div class="text-[10px] text-emerald-600 font-semibold mt-1">Click to select</div>
+              </button>
+            `;
+          }
+        }).join('');
+      }
+    } catch (err) {
+      console.error('Error loading slots:', err);
+      container.innerHTML = '<div class="col-span-full text-center text-xs text-rose-500">Failed to load schedule.</div>';
+    }
+  }
+
+  // Pre-fill form start & end times when clicking a free slot
+  function selectSlot(start, end) {
+    document.getElementById('startTimeInput').value = start;
+    document.getElementById('endTimeInput').value = end;
+    if (window.showToast) {
+      window.showToast('Slot Selected', `Time slot set to ${start} - ${end}`, 'info');
+    }
+  }
+
+  // Initialize slots
+  loadSlots(currentDate);
+
+  // Socket.IO Room Live Listener
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof io !== 'undefined') {
+      const socket = io();
+      socket.emit('join_room_view', roomId);
+
+      socket.on('room:slot_booked', (data) => {
+        if (data.date === currentDate) {
+          loadSlots(currentDate);
+          if (window.showToast) {
+            window.showToast('Schedule Updated', 'A new slot was just reserved for this room!', 'warning');
+          }
+        }
+      });
+
+      socket.on('room:slot_released', (data) => {
+        if (data.date === currentDate) {
+          loadSlots(currentDate);
+        }
+      });
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

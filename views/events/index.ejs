@@ -1,0 +1,125 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-200">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900">College Events & Workshops</h1>
+      <p class="text-sm text-slate-500 mt-1">Discover campus hackathons, technical symposiums, cultural fests, and workshops</p>
+    </div>
+
+    <% if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'faculty')) { %>
+      <div class="mt-4 md:mt-0">
+        <a href="/events/new" class="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/25 transition-all">
+          <i class="fas fa-plus mr-2"></i>Host New Event
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Search & Category Filters -->
+  <form action="/events" method="GET" class="my-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+    <!-- Search Bar -->
+    <div class="relative w-full md:w-96">
+      <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+        <i class="fas fa-search text-xs"></i>
+      </span>
+      <input type="text" name="search" value="<%= filters.search || '' %>" placeholder="Search event title, club or topic..." class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+    </div>
+
+    <!-- Category Pills / Select -->
+    <div class="flex items-center space-x-2 w-full md:w-auto">
+      <select name="category" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+        <option value="all">All Categories</option>
+        <% categories.forEach(cat => { %>
+          <option value="<%= cat %>" <%= filters.category === cat ? 'selected' : '' %>><%= cat %></option>
+        <% }) %>
+      </select>
+
+      <button type="submit" class="py-2 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all">
+        Search
+      </button>
+
+      <% if (filters.category || filters.search) { %>
+        <a href="/events" class="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all">
+          Reset
+        </a>
+      <% } %>
+    </div>
+  </form>
+
+  <!-- Events Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <% if (events && events.length > 0) { %>
+      <% events.forEach(event => { %>
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1">
+          <div>
+            <div class="relative h-48 w-full bg-slate-100 overflow-hidden">
+              <img src="<%= event.bannerImage %>" alt="<%= event.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <span class="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
+                <%= event.category %>
+              </span>
+              <span class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur text-white px-2.5 py-1 rounded-lg text-xs font-medium">
+                <i class="far fa-clock mr-1"></i><%= event.startTime %> - <%= event.endTime %>
+              </span>
+            </div>
+
+            <div class="p-6">
+              <div class="flex items-center space-x-2 text-xs font-semibold text-brand-600 mb-1">
+                <i class="far fa-calendar-alt"></i>
+                <span><%= new Date(event.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+              </div>
+
+              <h2 class="text-lg font-bold text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-1">
+                <%= event.title %>
+              </h2>
+
+              <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                <%= event.description %>
+              </p>
+
+              <!-- Capacity & Venue Info -->
+              <div class="mt-4 pt-4 border-t border-slate-100 space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-500">
+                  <span>
+                    <i class="fas fa-map-marker-alt text-brand-500 mr-1"></i>
+                    <%= event.room ? event.room.name : event.customVenue || 'Campus Center' %>
+                  </span>
+                  <span class="font-bold text-slate-700">
+                    <%= event.registeredCount %> / <%= event.capacity %> Registered
+                  </span>
+                </div>
+
+                <!-- Capacity Progress Bar -->
+                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <% const pct = Math.min(100, Math.round((event.registeredCount / event.capacity) * 100)); %>
+                  <div class="bg-brand-600 h-full rounded-full" style="width: <%= pct %>%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-6 pt-0 flex items-center justify-between">
+            <div class="text-[11px] text-slate-400 font-medium">
+              By <%= event.organizingClub || 'Campus Club' %>
+            </div>
+            <a href="/events/<%= event._id %>" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition-all hover:scale-[1.02]">
+              View Details & RSVP
+            </a>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-slate-300">
+        <i class="far fa-calendar-times text-4xl text-slate-300 mb-3"></i>
+        <h3 class="text-base font-bold text-slate-800">No Events Found</h3>
+        <p class="text-xs text-slate-500 mt-1">There are no upcoming events matching your selected category or query.</p>
+        <a href="/events" class="mt-4 inline-block px-4 py-2 bg-brand-600 text-white text-xs font-bold rounded-xl">Clear Filters</a>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

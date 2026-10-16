@@ -1,0 +1,73 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-200/80 p-8">
+    <div class="text-center">
+      <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl mx-auto mb-3">
+        <i class="fas fa-lock"></i>
+      </div>
+      <h2 class="text-2xl font-black text-slate-900">Sign In to CampusConnect</h2>
+      <p class="text-xs text-slate-500 mt-1">Access your college portal, bookings, and event passes</p>
+    </div>
+
+    <!-- Quick Demo Logins Pill -->
+    <div class="mt-6 p-3 bg-brand-50/70 border border-brand-100 rounded-xl">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-brand-700 block mb-2">⚡ Quick 1-Click Demo Logins:</span>
+      <div class="flex flex-wrap gap-1.5">
+        <button type="button" onclick="fillCredentials('admin@campus.edu', 'admin123')" class="px-2.5 py-1 bg-white hover:bg-brand-600 hover:text-white text-slate-700 text-xs font-semibold rounded-lg border border-brand-200 transition-colors shadow-sm">
+          👑 Admin
+        </button>
+        <button type="button" onclick="fillCredentials('faculty@campus.edu', 'faculty123')" class="px-2.5 py-1 bg-white hover:bg-brand-600 hover:text-white text-slate-700 text-xs font-semibold rounded-lg border border-brand-200 transition-colors shadow-sm">
+          👨‍🏫 Faculty
+        </button>
+        <button type="button" onclick="fillCredentials('student@campus.edu', 'student123')" class="px-2.5 py-1 bg-white hover:bg-brand-600 hover:text-white text-slate-700 text-xs font-semibold rounded-lg border border-brand-200 transition-colors shadow-sm">
+          🎓 Student
+        </button>
+      </div>
+    </div>
+
+    <form class="mt-6 space-y-4" action="/auth/login" method="POST">
+      <div>
+        <label for="email" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">College Email Address</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+            <i class="far fa-envelope text-sm"></i>
+          </span>
+          <input id="email" name="email" type="email" required placeholder="you@campus.edu" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+        </div>
+      </div>
+
+      <div>
+        <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Password</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+            <i class="fas fa-lock text-sm"></i>
+          </span>
+          <input id="password" name="password" type="password" required placeholder="••••••••" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg shadow-brand-500/25 transition-all hover:scale-[1.01] text-sm">
+          Sign In
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-6 text-center text-xs text-slate-500">
+      Don't have an account? 
+      <a href="/auth/register" class="font-bold text-brand-600 hover:text-brand-700">Create an account</a>
+    </div>
+  </div>
+</main>
+
+<script>
+  function fillCredentials(email, pass) {
+    document.getElementById('email').value = email;
+    document.getElementById('password').value = pass;
+  }
+</script>
+
+<%- include('../partials/footer') %>

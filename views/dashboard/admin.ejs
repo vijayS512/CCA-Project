@@ -1,0 +1,176 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200">
+    <div>
+      <div class="flex items-center space-x-2">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 uppercase tracking-wider">Super Administrator</span>
+        <span class="text-xs text-slate-400">&bull;</span>
+        <span class="text-xs text-emerald-600 font-semibold flex items-center">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>Live System Sync
+        </span>
+      </div>
+      <h1 class="text-3xl font-black text-slate-900 mt-1">Campus Command Center</h1>
+    </div>
+
+    <!-- Quick Tool Buttons -->
+    <div class="mt-4 sm:mt-0 flex items-center space-x-3">
+      <a href="/rooms/new" class="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all flex items-center space-x-1.5">
+        <i class="fas fa-plus text-brand-600"></i>
+        <span>Add Room</span>
+      </a>
+      <a href="/events/new" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/25 transition-all flex items-center space-x-1.5">
+        <i class="fas fa-calendar-plus"></i>
+        <span>Host Event</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Key Metrics Row (5 Cards) -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-8">
+    <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Users</span>
+        <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+          <i class="fas fa-users"></i>
+        </div>
+      </div>
+      <div class="text-2xl font-black text-slate-900 mt-2"><%= stats.totalUsers %></div>
+      <div class="text-[10px] text-slate-400 mt-1">Faculty & Students</div>
+    </div>
+
+    <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Campus Venues</span>
+        <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+          <i class="far fa-building"></i>
+        </div>
+      </div>
+      <div class="text-2xl font-black text-slate-900 mt-2"><%= stats.totalRooms %></div>
+      <div class="text-[10px] text-slate-400 mt-1">Active Halls & Labs</div>
+    </div>
+
+    <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm <%= stats.pendingBookingsCount > 0 ? 'ring-2 ring-amber-400/50 bg-amber-50/20' : '' %>">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pending Requests</span>
+        <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
+          <i class="fas fa-hourglass-half"></i>
+        </div>
+      </div>
+      <div class="text-2xl font-black text-amber-600 mt-2"><%= stats.pendingBookingsCount %></div>
+      <a href="/bookings/manage?status=pending" class="text-[10px] font-bold text-amber-700 hover:underline mt-1 block">Review Now &rarr;</a>
+    </div>
+
+    <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Events</span>
+        <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+          <i class="far fa-calendar-alt"></i>
+        </div>
+      </div>
+      <div class="text-2xl font-black text-slate-900 mt-2"><%= stats.activeEventsCount %></div>
+      <div class="text-[10px] text-slate-400 mt-1">Upcoming on Campus</div>
+    </div>
+
+    <div class="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm col-span-2 sm:col-span-1">
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Booked Today</span>
+        <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
+          <i class="far fa-clock"></i>
+        </div>
+      </div>
+      <div class="text-2xl font-black text-purple-600 mt-2"><%= stats.todayBookingsCount %></div>
+      <div class="text-[10px] text-slate-400 mt-1">Reserved Slots</div>
+    </div>
+  </div>
+
+  <!-- Content 2 Columns: Pending Approvals & Upcoming Events -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+    
+    <!-- Pending Approvals (2 Cols) -->
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Room Booking Requests Needing Approval</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Real-time requests submitted by faculty and student clubs</p>
+        </div>
+        <a href="/bookings/manage" class="text-xs font-bold text-brand-600 hover:text-brand-800">View All</a>
+      </div>
+
+      <div class="mt-4">
+        <% if (pendingBookings && pendingBookings.length > 0) { %>
+          <div class="space-y-3">
+            <% pendingBookings.forEach(b => { %>
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-100/70 transition-colors">
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-bold text-slate-900 text-xs"><%= b.user ? b.user.name : 'Unknown' %></span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-semibold uppercase"><%= b.user ? b.user.role : 'Student' %></span>
+                    <span class="text-[11px] text-slate-400">&bull; <%= b.user ? b.user.department : '' %></span>
+                  </div>
+                  <div class="text-xs font-semibold text-brand-600 mt-1">
+                    <%= b.room ? b.room.name : 'Unknown Room' %> &bull; <%= b.date %> (<%= b.startTime %> - <%= b.endTime %>)
+                  </div>
+                  <p class="text-xs text-slate-600 mt-0.5 italic">"<%= b.purpose %>"</p>
+                </div>
+
+                <div class="flex items-center space-x-2 shrink-0">
+                  <form action="/bookings/<%= b._id %>/status" method="POST" class="inline">
+                    <input type="hidden" name="status" value="approved">
+                    <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-sm transition-all">
+                      Approve
+                    </button>
+                  </form>
+                  <form action="/bookings/<%= b._id %>/status" method="POST" class="inline">
+                    <input type="hidden" name="status" value="rejected">
+                    <input type="hidden" name="adminRemarks" value="Venue unavailable for requested time slot.">
+                    <button type="submit" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-lg shadow-sm transition-all">
+                      Reject
+                    </button>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="text-center py-8 text-slate-400 text-xs">
+            <i class="far fa-check-circle text-2xl text-emerald-500 mb-2 block"></i>
+            All booking requests have been reviewed!
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Right Side: System Audit Logs -->
+    <div class="lg:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h2 class="text-lg font-bold text-slate-900">Security Audit Logs</h2>
+        <span class="text-[10px] font-bold text-slate-400 uppercase">Live Stream</span>
+      </div>
+
+      <div class="mt-4 space-y-3">
+        <% if (recentLogs && recentLogs.length > 0) { %>
+          <% recentLogs.forEach(log => { %>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-800"><%= log.action %></span>
+                <span class="text-[10px] text-slate-400"><%= new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></span>
+              </div>
+              <div class="text-slate-500 text-[11px] mt-0.5">
+                By <span class="font-semibold text-brand-600"><%= log.user ? log.user.name : 'System' %></span> on <%= log.resource %>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="text-center py-6 text-slate-400 text-xs">No audit logs recorded yet.</div>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

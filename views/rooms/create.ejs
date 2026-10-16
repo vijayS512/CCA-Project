@@ -1,0 +1,81 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <div class="mb-4 flex items-center space-x-2 text-xs text-slate-500">
+    <a href="/rooms" class="hover:text-brand-600">Venues & Rooms</a>
+    <span>/</span>
+    <span class="text-slate-800 font-bold"><%= isEdit ? 'Edit ' + room.name : 'Add New Venue' %></span>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+    <div class="border-b border-slate-100 pb-4 mb-6">
+      <h1 class="text-2xl font-black text-slate-900"><%= isEdit ? 'Edit Venue Details' : 'Add Campus Venue / Room' %></h1>
+      <p class="text-xs text-slate-500 mt-1">Configure room specifications, capacity, and amenities for students and faculty.</p>
+    </div>
+
+    <form action="<%= isEdit ? '/rooms/' + room._id + '/edit' : '/rooms/new' %>" method="POST" class="space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Room Name / Number</label>
+          <input type="text" name="name" required value="<%= isEdit ? room.name : '' %>" placeholder="e.g. Auditorium A, CS Lab 204" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Building</label>
+          <input type="text" name="building" required value="<%= isEdit ? room.building : '' %>" placeholder="e.g. Academic Complex Block C" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Floor</label>
+          <input type="text" name="floor" value="<%= isEdit ? room.floor : '2nd Floor' %>" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Capacity</label>
+          <input type="number" name="capacity" min="1" required value="<%= isEdit ? room.capacity : 50 %>" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Room Type</label>
+          <select name="roomType" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <% ['Auditorium', 'Seminar Hall', 'Lecture Hall', 'Computer Lab', 'Conference Room', 'Study Room'].forEach(type => { %>
+              <option value="<%= type %>" <%= isEdit && room.roomType === type ? 'selected' : '' %>><%= type %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Amenities (Comma-separated)</label>
+        <input type="text" name="amenities" value="<%= isEdit ? room.amenities.join(', ') : 'WiFi, Projector, Sound System, Whiteboard' %>" placeholder="WiFi, Projector, Smart Board, AC" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Image URL</label>
+        <input type="url" name="image" value="<%= isEdit ? room.image : 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80' %>" placeholder="https://..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Description / Location Details</label>
+        <textarea name="description" rows="3" placeholder="Enter special directions, audiovisual setup details, or accessibility notes..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"><%= isEdit ? room.description : '' %></textarea>
+      </div>
+
+      <% if (isEdit) { %>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="isAvailable" name="isAvailable" value="true" <%= room.isAvailable ? 'checked' : '' %> class="w-4 h-4 text-brand-600 rounded">
+          <label for="isAvailable" class="text-xs font-bold text-slate-700">Room is available for bookings (Uncheck for Maintenance)</label>
+        </div>
+      <% } %>
+
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+        <a href="/rooms" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl">Cancel</a>
+        <button type="submit" class="px-7 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/25">
+          <%= isEdit ? 'Update Room' : 'Create Room' %>
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,110 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900">My Venue Bookings</h1>
+      <p class="text-sm text-slate-500 mt-1">Track your room reservation requests, approval statuses, and schedules</p>
+    </div>
+    <div class="mt-4 sm:mt-0">
+      <a href="/rooms" class="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/25 transition-all">
+        <i class="far fa-plus-square mr-2"></i>Book Another Room
+      </a>
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <% if (bookings && bookings.length > 0) { %>
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th class="py-3.5 px-4 sm:px-6">Room / Venue</th>
+                <th class="py-3.5 px-4">Date & Time</th>
+                <th class="py-3.5 px-4">Purpose</th>
+                <th class="py-3.5 px-4">Status</th>
+                <th class="py-3.5 px-4">Admin Remarks</th>
+                <th class="py-3.5 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+              <% bookings.forEach(booking => { %>
+                <tr class="hover:bg-slate-50/60 transition-colors">
+                  <td class="py-4 px-4 sm:px-6">
+                    <% if (booking.room) { %>
+                      <div class="font-bold text-slate-900"><%= booking.room.name %></div>
+                      <div class="text-[11px] text-slate-400"><%= booking.room.building %></div>
+                    <% } else { %>
+                      <span class="text-slate-400">Venue Removed</span>
+                    <% } %>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div class="font-semibold text-slate-800"><%= booking.date %></div>
+                    <div class="text-[11px] text-slate-500"><%= booking.startTime %> - <%= booking.endTime %></div>
+                  </td>
+                  <td class="py-4 px-4 max-w-xs">
+                    <p class="truncate" title="<%= booking.purpose %>"><%= booking.purpose %></p>
+                    <span class="text-[10px] text-slate-400"><%= booking.expectedAttendees %> attendees</span>
+                  </td>
+                  <td class="py-4 px-4">
+                    <% if (booking.status === 'approved') { %>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase">
+                        <i class="fas fa-check-circle mr-1 text-emerald-600"></i>Approved
+                      </span>
+                    <% } else if (booking.status === 'pending') { %>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase">
+                        <i class="fas fa-clock mr-1 text-amber-600"></i>Pending Review
+                      </span>
+                    <% } else if (booking.status === 'rejected') { %>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 uppercase">
+                        <i class="fas fa-times-circle mr-1 text-rose-600"></i>Rejected
+                      </span>
+                    <% } else if (booking.status === 'completed') { %>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 uppercase">
+                        Completed
+                      </span>
+                    <% } else { %>
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 uppercase">
+                        <%= booking.status %>
+                      </span>
+                    <% } %>
+                  </td>
+                  <td class="py-4 px-4 text-slate-500 italic text-[11px]">
+                    <%= booking.adminRemarks || '—' %>
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <% if (booking.status === 'pending') { %>
+                      <form action="/bookings/<%= booking._id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this booking request?');" class="inline">
+                        <button type="submit" class="px-2.5 py-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg text-xs font-semibold transition-colors">
+                          Cancel
+                        </button>
+                      </form>
+                    <% } else if (booking.room) { %>
+                      <a href="/rooms/<%= booking.room._id %>" class="px-2.5 py-1 text-brand-600 hover:text-brand-800 hover:bg-brand-50 rounded-lg text-xs font-semibold transition-colors">
+                        View Room
+                      </a>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="py-16 text-center bg-white rounded-2xl border border-dashed border-slate-300">
+        <i class="far fa-calendar-times text-4xl text-slate-300 mb-3"></i>
+        <h3 class="text-base font-bold text-slate-800">No Bookings Yet</h3>
+        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">You haven't requested any room reservations yet. Find an auditorium, lecture hall, or lab to get started.</p>
+        <a href="/rooms" class="mt-4 inline-block px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/25">
+          Browse Campus Venues
+        </a>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

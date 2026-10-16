@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<main class="flex-1 flex items-center justify-center py-20 px-4 text-center">
+  <div class="max-w-md w-full">
+    <div class="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl mx-auto mb-4">
+      <i class="fas fa-search-location"></i>
+    </div>
+    <h1 class="text-6xl font-black text-slate-900">404</h1>
+    <h2 class="text-xl font-bold text-slate-800 mt-2">Campus Page Not Found</h2>
+    <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+      The venue, event or page you requested at <span class="font-mono text-slate-700 bg-slate-100 px-1 rounded"><%= typeof url !== 'undefined' ? url : '' %></span> could not be located.
+    </p>
+    <div class="mt-6 flex justify-center space-x-3">
+      <a href="/" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+        Return Home
+      </a>
+      <a href="/events" class="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all">
+        Browse Events
+      </a>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

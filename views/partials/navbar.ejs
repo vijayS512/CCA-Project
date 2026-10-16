@@ -1,0 +1,171 @@
+<nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      
+      <!-- Logo & Main Nav -->
+      <div class="flex items-center space-x-8">
+        <a href="/" class="flex items-center space-x-2.5 group">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
+            <i class="fas fa-graduation-cap text-lg"></i>
+          </div>
+          <div>
+            <span class="text-xl font-bold bg-gradient-to-r from-brand-700 to-indigo-600 bg-clip-text text-transparent">CampusConnect</span>
+            <span class="hidden sm:inline-block text-[10px] font-semibold tracking-wider text-slate-400 block -mt-1 uppercase">Portal & Booking</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <div class="hidden md:flex items-center space-x-1">
+          <a href="/events" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors <%= currentPath.startsWith('/events') ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' %>">
+            <i class="far fa-calendar-alt mr-1.5 opacity-70"></i>Events
+          </a>
+          <a href="/rooms" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors <%= currentPath.startsWith('/rooms') ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' %>">
+            <i class="far fa-building mr-1.5 opacity-70"></i>Venues & Rooms
+          </a>
+
+          <% if (currentUser) { %>
+            <a href="/dashboard" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors <%= currentPath === '/dashboard' ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' %>">
+              <i class="fas fa-columns mr-1.5 opacity-70"></i>Dashboard
+            </a>
+            <a href="/bookings/my-bookings" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors <%= currentPath === '/bookings/my-bookings' ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' %>">
+              <i class="far fa-clock mr-1.5 opacity-70"></i>My Bookings
+            </a>
+            <% if (currentUser.role === 'student') { %>
+              <a href="/events/my-tickets" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors <%= currentPath === '/events/my-tickets' ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' %>">
+                <i class="fas fa-ticket-alt mr-1.5 opacity-70"></i>My Passes
+              </a>
+            <% } %>
+            <% if (currentUser.role === 'admin' || currentUser.role === 'faculty') { %>
+              <a href="/bookings/manage" class="px-3 py-2 rounded-lg text-sm font-medium transition-colors <%= currentPath === '/bookings/manage' ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' %>">
+                <i class="fas fa-clipboard-check mr-1.5 opacity-70"></i>Manage Bookings
+              </a>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Right Header Actions (Auth / User menu / Notifications) -->
+      <div class="flex items-center space-x-3">
+        <% if (currentUser) { %>
+          
+          <!-- In-App Notification Bell -->
+          <div class="relative">
+            <button id="notification-bell-btn" class="relative p-2 rounded-xl text-slate-500 hover:text-brand-600 hover:bg-brand-50 transition-colors focus:outline-none">
+              <i class="far fa-bell text-lg"></i>
+              <span id="nav-notification-badge" class="hidden absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center">0</span>
+            </button>
+
+            <!-- Notifications Dropdown -->
+            <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50">
+              <div class="p-3.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Notifications</h3>
+                <span class="text-[11px] text-brand-600 font-medium">Real-Time</span>
+              </div>
+              <div id="notification-list" class="max-h-72 overflow-y-auto divide-y divide-slate-50">
+                <div class="p-4 text-center text-xs text-slate-400">Loading notifications...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Button -->
+          <% if (currentUser.role === 'admin' || currentUser.role === 'faculty') { %>
+            <a href="/events/new" class="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-all hover:shadow-brand-500/25">
+              <i class="fas fa-plus mr-1.5"></i>Host Event
+            </a>
+          <% } %>
+
+          <!-- User Profile Dropdown -->
+          <div class="relative group">
+            <button class="flex items-center space-x-2.5 p-1 rounded-full hover:ring-2 hover:ring-brand-200 transition-all focus:outline-none">
+              <img src="<%= currentUser.avatar %>" alt="<%= currentUser.name %>" class="w-8 h-8 rounded-full object-cover border border-slate-200">
+              <div class="hidden lg:block text-left">
+                <div class="text-xs font-bold text-slate-800 leading-tight"><%= currentUser.name %></div>
+                <div class="text-[10px] uppercase font-semibold text-brand-600 tracking-wider"><%= currentUser.role %></div>
+              </div>
+              <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div class="hidden group-hover:block absolute right-0 pt-2 w-56 z-50">
+              <div class="bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 overflow-hidden">
+                <div class="px-4 py-2 border-b border-slate-100">
+                  <p class="text-xs text-slate-500">Signed in as</p>
+                  <p class="text-xs font-bold text-slate-800 truncate"><%= currentUser.email %></p>
+                </div>
+                <a href="/auth/profile" class="flex items-center px-4 py-2 text-xs text-slate-700 hover:bg-slate-50">
+                  <i class="far fa-user mr-2 text-slate-400"></i>My Profile
+                </a>
+                <a href="/dashboard" class="flex items-center px-4 py-2 text-xs text-slate-700 hover:bg-slate-50">
+                  <i class="fas fa-columns mr-2 text-slate-400"></i>Dashboard
+                </a>
+                <% if (currentUser.role === 'admin') { %>
+                  <a href="/rooms/new" class="flex items-center px-4 py-2 text-xs text-slate-700 hover:bg-slate-50">
+                    <i class="fas fa-plus mr-2 text-slate-400"></i>Add New Room
+                  </a>
+                <% } %>
+                <div class="border-t border-slate-100 my-1"></div>
+                <a href="/auth/logout" class="flex items-center px-4 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50">
+                  <i class="fas fa-sign-out-alt mr-2 text-rose-500"></i>Sign Out
+                </a>
+              </div>
+            </div>
+          </div>
+
+        <% } else { %>
+          <!-- Guest User Buttons -->
+          <a href="/auth/login" class="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-brand-600 transition-colors">
+            Log in
+          </a>
+          <a href="/auth/register" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-md shadow-brand-500/20 transition-all hover:scale-[1.02]">
+            Sign up free
+          </a>
+        <% } %>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 focus:outline-none">
+          <i class="fas fa-bars text-lg"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Menu Dropdown -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1">
+    <a href="/events" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">
+      <i class="far fa-calendar-alt mr-2 text-brand-600"></i>Events
+    </a>
+    <a href="/rooms" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">
+      <i class="far fa-building mr-2 text-brand-600"></i>Venues & Rooms
+    </a>
+    <% if (currentUser) { %>
+      <a href="/dashboard" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">
+        <i class="fas fa-columns mr-2 text-brand-600"></i>Dashboard
+      </a>
+      <a href="/bookings/my-bookings" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">
+        <i class="far fa-clock mr-2 text-brand-600"></i>My Bookings
+      </a>
+      <% if (currentUser.role === 'student') { %>
+        <a href="/events/my-tickets" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">
+          <i class="fas fa-ticket-alt mr-2 text-brand-600"></i>My Passes
+        </a>
+      <% } %>
+      <% if (currentUser.role === 'admin' || currentUser.role === 'faculty') { %>
+        <a href="/bookings/manage" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">
+          <i class="fas fa-clipboard-check mr-2 text-brand-600"></i>Manage Bookings
+        </a>
+      <% } %>
+      <a href="/auth/profile" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">
+        <i class="far fa-user mr-2 text-brand-600"></i>My Profile
+      </a>
+      <a href="/auth/logout" class="block px-3 py-2 rounded-lg text-base font-medium text-rose-600 hover:bg-rose-50">
+        <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+      </a>
+    <% } else { %>
+      <div class="pt-2 flex flex-col space-y-2">
+        <a href="/auth/login" class="w-full text-center py-2 text-sm font-semibold text-slate-700 border border-slate-300 rounded-lg">Log in</a>
+        <a href="/auth/register" class="w-full text-center py-2 text-sm font-semibold text-white bg-brand-600 rounded-lg">Sign up</a>
+      </div>
+    <% } %>
+  </div>
+</nav>

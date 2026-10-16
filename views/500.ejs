@@ -1,0 +1,29 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<main class="flex-1 flex items-center justify-center py-20 px-4 text-center">
+  <div class="max-w-md w-full">
+    <div class="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl mx-auto mb-4">
+      <i class="fas fa-bug"></i>
+    </div>
+    <h1 class="text-6xl font-black text-slate-900">500</h1>
+    <h2 class="text-xl font-bold text-slate-800 mt-2">Server Encountered An Error</h2>
+    <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+      <%= typeof message !== 'undefined' ? message : 'An unexpected system error occurred. Please try again in a moment.' %>
+    </p>
+
+    <% if (typeof error !== 'undefined' && error && error.stack) { %>
+      <div class="mt-4 p-4 bg-slate-900 text-slate-100 rounded-xl text-left text-[10px] font-mono overflow-x-auto max-h-48">
+        <%= error.stack %>
+      </div>
+    <% } %>
+
+    <div class="mt-6">
+      <a href="/" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+        Back to Safety
+      </a>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

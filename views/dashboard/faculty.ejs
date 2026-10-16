@@ -1,0 +1,102 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200">
+    <div>
+      <div class="flex items-center space-x-2">
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 uppercase tracking-wider">Faculty Portal</span>
+        <span class="text-xs text-slate-400">&bull;</span>
+        <span class="text-xs text-slate-500"><%= currentUser.department %> Department</span>
+      </div>
+      <h1 class="text-3xl font-black text-slate-900 mt-1">Faculty & Organizer Workspace</h1>
+    </div>
+
+    <div class="mt-4 sm:mt-0 flex items-center space-x-3">
+      <a href="/events/new" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-md shadow-brand-500/25 transition-all">
+        <i class="fas fa-plus mr-1.5"></i>Host New Event
+      </a>
+      <a href="/rooms" class="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all">
+        <i class="far fa-building mr-1.5 text-brand-600"></i>Book Venue
+      </a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+    
+    <!-- My Hosted Events -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Events Hosted By Me</h2>
+          <p class="text-xs text-slate-500">Track RSVPs, capacity, and check-in attendees</p>
+        </div>
+        <a href="/events/new" class="text-xs font-bold text-brand-600 hover:text-brand-800">+ New Event</a>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <% if (myEvents && myEvents.length > 0) { %>
+          <% myEvents.forEach(evt => { %>
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+              <div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-700 uppercase"><%= evt.category %></span>
+                <h3 class="text-sm font-bold text-slate-900 mt-1"><%= evt.title %></h3>
+                <div class="text-xs text-slate-500 mt-0.5">
+                  <%= new Date(evt.date).toDateString() %> &bull; <%= evt.registeredCount %> / <%= evt.capacity %> registered
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <a href="/events/<%= evt._id %>/attendees" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-xs rounded-lg transition-colors">
+                  <i class="fas fa-users mr-1"></i>Roster
+                </a>
+                <a href="/events/<%= evt._id %>" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-lg transition-colors">
+                  View
+                </a>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="text-center py-8 text-slate-400 text-xs">
+            You haven't published any events yet. Click Host New Event to get started.
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- My Room Bookings -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Recent Venue Bookings</h2>
+          <p class="text-xs text-slate-500">Classroom, lab and auditorium reservations</p>
+        </div>
+        <a href="/bookings/my-bookings" class="text-xs font-bold text-brand-600 hover:text-brand-800">View All</a>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <% if (myBookings && myBookings.length > 0) { %>
+          <% myBookings.forEach(b => { %>
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-slate-900"><%= b.room ? b.room.name : 'Unknown Room' %></div>
+                <div class="text-xs text-slate-500 mt-0.5"><%= b.date %> &bull; <%= b.startTime %> - <%= b.endTime %></div>
+                <div class="text-[11px] text-slate-400 italic">"<%= b.purpose %>"</div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase <%= b.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+                <%= b.status %>
+              </span>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="text-center py-8 text-slate-400 text-xs">
+            No room bookings found. Check available venues to book.
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
